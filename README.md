@@ -26,7 +26,7 @@ Our reproduction matches (and slightly exceeds) the original paper’s performan
 
 ## Model Architecture
 
-![EM-VLM4AD Architecture](architecture.png)
+![EM-VLM4AD Architecture](Architecture.png)
 
 **Main Components:**
 1. Frozen **ViT-B/32** encoder for each camera view
@@ -40,17 +40,17 @@ Our reproduction matches (and slightly exceeds) the original paper’s performan
 
 ### Quantitative Comparison
 
-![Quantitative Results](results_table.png)
+![Quantitative Results](Image1.png)
 
 Our reproduced model outperforms the original paper on BLEU-4, METEOR, ROUGE-L, and CIDEr.
 
 ### Correct Predictions
 
-![Correct Examples](correct_examples.png)
+![Correct Examples](w_img1.png)
 
 ### Failure Cases (mainly Ego-Behavior Prediction)
 
-![Failure Cases](failure_cases.png)
+![Failure Cases](w_img2.png)
 
 ---
 
