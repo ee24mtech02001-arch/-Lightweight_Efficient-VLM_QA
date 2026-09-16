@@ -1,75 +1,80 @@
-# EM-VLM4AD
-[![arXiv](https://img.shields.io/badge/arXiv-2402.03235-a2ad00.svg)](https://arxiv.org/abs/2403.19838)
-<div style="display: flex;">
-    <img src="assets/ex1.jpeg" alt="Image 1" style="width: 49%;">
-    <img src="assets/ex2.jpeg" alt="Image 2" style="width: 49%;">
-</div>
+# Multi-Frame, Lightweight & Efficient Vision-Language Models  
+### for Question Answering in Autonomous Driving
+---
 
-* This repository contains the code necessary to replicate the paper "[Efficient, Lightweight Multi-Frame Vision Language Model for Visual Question Answering in Autonomous Driving](https://arxiv.org/abs/2403.19838)", which was accepted to the Vision & Language for Autonomous Driving & Robotics Workshop at CVPR 2024.
-* Authors: Akshay Gopalkrishnan, Ross Greer, and Mohan Trivedi
-## Citation
-If you find our code and research paper useful, please cite our paper as following:
-```
-@article{gopalkrishnan2024multi,
-  title={Multi-Frame, Lightweight \& Efficient Vision-Language Models for Question Answering in Autonomous Driving},
-  author={Gopalkrishnan, Akshay and Greer, Ross and Trivedi, Mohan},
-  journal={arXiv preprint arXiv:2403.19838},
-  year={2024}
-}
-```
-## Installation
-1. Clone this repository
-2. In the repository directory, run `mkdir multi_frame_results`
-3. To replicate our environment use the `env.yml` we have provided. The following commands should create a proper environment:
-```
-conda env create -f env.yml
-conda activate EM-VLM4AD
-```
-## Model Weights
-* You can download the model weights for the [T5-Base](https://drive.google.com/drive/folders/1K61Ou-m5c5UmN2ggT-Huw3rv7PhW5Wft?usp=sharing) and [T5-Large-Q](https://drive.google.com/drive/folders/12bHyRTpWWxIJ2pb0WWzfX5mMdkNHKMVP?usp=sharing) version of EM-VLM4AD at the following links. Put the folders for each of these models into the `multi_frame_results` folder. Your directory should look like the following:
-```
-└── rootFolder
- ├── multi_frame_results/
-      ├── T5-Medium/
-        ├── latest_model.pth
-      ├── T5-Large/
-        ├── latest_model.pth
-```
-## Dataset
-First download the train/val/test split [here](https://drive.google.com/file/d/1isiXXTg46nl5SqMiEV4XjFD71KCCzezi/view?usp=sharing) in your root folder. This will include data from the DriveLM dataset as well as the train/val/test splits we use for our experiments. The folder structure should now be as follows: 
-```
-└── rootFolder
-  ├── data/
-    ├── multi_frame/
-      ├── multi_frame_train.json
-      ├── multi_frame_val.json
-      ├── multi_frame_test.json
-      ├── multi_frame_test_coco.json
-      ├── image_id.json
-    ├── QA_dataset_nus/
-      ├── v1_0_train_nus.json
-    ├── nuscenes/
-      ├── samples/
-  ├── multi_frame_results/
-      ├── T5-Medium/
-      ├── T5-Large/
-```
-## Training
-* To run training, run `python train.py --batch-size [BATCH SIZE] --epochs [EPOCHS] --lm {T5-Base, T5-Large}`. For more information on other hyperparameters such as loading checkpoints or altering learning rate, weight decay, or the hidden size for gated pooling attention, run `python train.py --help`.
-## Inference
-* For inference to generate BLEU-4, CIDEr, METEOR, and ROUGE_L metrics for trained models, you can run `python eval.py --batch-size [BATCH_SIZE] --lm {T5-Base, T5-Large} --checkpoint-file [CHECKPOINT_FOLDER]`. For more information on other hyperparameters to work for different model configurations, run `python eval.py --help`.
-* We use the [pycocoevalcap](https://github.com/salaniz/pycocoevalcap) library to generate the caption metrics we evaluate on. For this library, Java needs to be installed on your computer. We also recommend commenting out [this line](https://github.com/salaniz/pycocoevalcap/blob/master/eval.py#L45) from the pycocoevalcap library to avoid generating SPICE metrics, which can take longer and don't work for multi-frame situations. 
-## Running on Google Colab
-If you want to run our code on Google Colab, we have provided three different notebooks in the `colab` folder that can be used for training each model type and inference:
-* `train_T5_Base.ipynb`: Allows for training EM-VLM4AD with the T5-Medium LM backbone.
-* `train_T5_Large.ipynb`: Allows for training EM-VLM4AD with the quantized T5-Large LM backbone. 
-    * Training hyperparameters are in the `Hyperparameters` section of the training Colab notebooks. This can allow you to resume training from a checkpoint and whether the LM should be freezed during training.
-* `eval.ipynb` Generates BLEU-4, METEOR, CIDER, and ROUGE_L metrics for a trained model. Make sure to specify model checkpoint being evaluated and what LM backbone is being used ('T5-Medium' or 'T5-Large') in the `Hyperparameters` section.
-* We recommend making a folder `DriveLM` in your Google Drive and uploading the model checkpoints and zipped data to this folder. An example directory should look like this:
-```
-└── DriveLM
-    ├── data.zip
-    ├── multi_frame_results/
-      ├── T5-Medium/
-      ├── T5-Large/
-```
+## Overview
+
+This project reviews, reproduces, and extends **EM-VLM4AD** — a lightweight multi-frame Vision-Language Model (VLM) designed for Visual Question Answering (VQA) in Autonomous Driving.
+
+Unlike existing large AD-VLMs (LLaMA-7B, BLIP-2, etc.), EM-VLM4AD is highly efficient and can run on consumer-grade GPUs while processing **six surround-view camera images** at once.
+
+**Key Achievement:**  
+Our reproduction matches (and slightly exceeds) the original paper’s performance on the DriveLM benchmark while using **≥10× less memory**.
+
+---
+
+## Key Highlights
+
+- Lightweight architecture (235M – 769M parameters)
+- Processes **6 surround-view cameras** simultaneously
+- Uses **Gated Pooling Attention** for intelligent multi-view fusion
+- Fine-tuned T5 language model for natural language answers
+- Much more efficient than DriveLM-Agent, DriveMLM, LLM-Driver, and DriveGPT4
+- Proposed novelty: **Temporal Attention Module** for multi-frame reasoning
+
+---
+
+## Model Architecture
+
+![EM-VLM4AD Architecture](architecture.png)
+
+**Main Components:**
+1. Frozen **ViT-B/32** encoder for each camera view
+2. **Gated Pooling Attention** to fuse the six views
+3. Projection layer to align with the language model
+4. **T5** (Base or Large) for answer generation
+
+---
+
+## Results
+
+### Quantitative Comparison
+
+![Quantitative Results](results_table.png)
+
+Our reproduced model outperforms the original paper on BLEU-4, METEOR, ROUGE-L, and CIDEr.
+
+### Correct Predictions
+
+![Correct Examples](correct_examples.png)
+
+### Failure Cases (mainly Ego-Behavior Prediction)
+
+![Failure Cases](failure_cases.png)
+
+---
+
+## Proposed Novelty: Temporal Attention Extension
+
+Current models only look at a single timestamp.  
+We propose adding a lightweight **Temporal Attention Module** to enable reasoning over multiple frames (important for predicting ego-vehicle behavior and motion).
+
+---
+
+## Computational Efficiency
+
+| Model                  | Parameters | Memory   |
+|------------------------|------------|----------|
+| EM-VLM4AD Base         | ~320 M     | ~1.2 GB  |
+| EM-VLM4AD Q-Large      | 769 M      | **0.77 GB** |
+| DriveLM-Agent          | 3.96 B     | 14.43 GB |
+| Other large AD-VLMs    | 7–8 B      | 28–36 GB |
+
+---
+
+## Conclusion
+
+This project successfully reproduces EM-VLM4AD and confirms that a carefully designed lightweight multi-frame VLM can achieve strong performance on autonomous driving VQA while remaining practical for real-world deployment.
+
+The main remaining challenge is **temporal reasoning**, which we address by proposing a Temporal Attention Extension.
+
